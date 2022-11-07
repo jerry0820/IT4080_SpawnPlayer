@@ -8,12 +8,16 @@ public class Player : NetworkBehaviour {
     public NetworkVariable<Vector3> PositionChange = new NetworkVariable<Vector3>();
     public NetworkVariable<Vector3> RotationChange = new NetworkVariable<Vector3>();
     public NetworkVariable<Color> PlayerColor = new NetworkVariable<Color>(Color.red);
+    public NetworkVariable<int> Score = new NetworkVariable<int>(50);
+
+    public TMPro.TMP_Text txtScoreDisplay;
 
     private GameManager _gameMgr;
     private Camera _camera;
     public float movementSpeed = .5f;
-    private float rotationSpeed = 1f;
+    private float rotationSpeed = 4f;
     private BulletSpawner _bulletSpawner;
+    
 
     private void Start() {
         ApplyPlayerColor();
@@ -24,8 +28,14 @@ public class Player : NetworkBehaviour {
     public override void OnNetworkSpawn() {
         _camera = transform.Find("Camera").GetComponent<Camera>();
         _camera.enabled = IsOwner;
+
+        Score.OnValueChanged += ClientOnScoreChanged;
+        DisplayScore();
     }
 
+    private void ClientOnScoreChanged(int previous, int current){
+        DisplayScore();
+    }
 
     [ServerRpc]
     void RequestPositionForMovementServerRpc(Vector3 posChange, Vector3 rotChange) {
@@ -35,9 +45,21 @@ public class Player : NetworkBehaviour {
         RotationChange.Value = rotChange;
     }
 
+    [ServerRpc]
+    public void RequestSetScoreServerRpc(int value) {
+        Score.Value = value;
+    }
+
 
     public void OnPlayerColorChanged(Color previous, Color current) {
         ApplyPlayerColor();
+    }
+
+    public void OnCollisionEnter(Collision collision) {
+        if (IsHost) {
+            Score.Value -= 1;
+            Destroy(collision.gameObject);
+        }
     }
 
     public void ApplyPlayerColor() {
@@ -83,5 +105,9 @@ public class Player : NetworkBehaviour {
             transform.Translate(PositionChange.Value);
             transform.Rotate(RotationChange.Value);
         }
+    }
+
+    public void DisplayScore() {
+        txtScoreDisplay.text = Score.Value.ToString();
     }
 }

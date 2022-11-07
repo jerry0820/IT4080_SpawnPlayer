@@ -54,6 +54,10 @@ public class LobbyManager : NetworkBehaviour
         EnableStartIfAllReady();
     }
 
+    public override void OnDestroy() {
+        GameData.Instance.allPlayers.OnListChanged -= ClientOnAllPlayersChanged;
+    }
+
     // -----------------------
     // Private
     // -----------------------
@@ -86,11 +90,11 @@ public class LobbyManager : NetworkBehaviour
         }
 
         btnStart.enabled = readyCount == GameData.Instance.allPlayers.Count;
-        if (btnStart.enabled) {
-            btnStart.GetComponentInChildren<TextMeshProUGUI>().text = "Start";
-        } else {
-            btnStart.GetComponentInChildren<TextMeshProUGUI>().text = "<Waiting for Ready>";
+        string buttonText = "Start";
+        if (!btnStart.enabled) {
+            buttonText = "<Waiting for Ready>";
         }
+        btnStart.GetComponentInChildren<TextMeshProUGUI>().text = buttonText;
     }
 
     // -----------------------
