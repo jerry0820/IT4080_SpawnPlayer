@@ -44,7 +44,7 @@ public class GameManager : NetworkBehaviour {
     private void SpawnPlayers(){
         foreach(PlayerInfo pi in GameData.Instance.allPlayers){
             Player playerSpawn = Instantiate(playerPrefab, GetNextSpawnLocation(), Quaternion.identity);
-            playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(pi.clientId);
+            playerSpawn.GetComponent<NetworkObject>().SpawnAsPlayerObject(pi.clientId);
             playerSpawn.PlayerColor.Value = pi.color;
         }
 
