@@ -92,6 +92,7 @@ public class Player : NetworkBehaviour {
     private void HostHandleDamageBoostPickup(Collider other) {
         if (!_bulletSpawner.IsAtMaxDamage()){
             _bulletSpawner.IncreaseDamage();
+            Score.Value += 1;
         
             other.GetComponent<NetworkObject>().Despawn();
         }
@@ -110,6 +111,9 @@ public class Player : NetworkBehaviour {
     public void OnCollisionEnter(Collision collision) {
         if (IsHost) {
             if (collision.gameObject.CompareTag("Bullet")) {
+                if(Score.Value <= 0){
+                    NetworkManager.SceneManager.LoadScene("DIE", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                }
                 HostHandleBulletCollision(collision.gameObject);
             }
         }
